@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: dsquiz_db
+    environment:
+      POSTGRES_DB: dsquiz
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - dsquiznet
+
+  app:
+    build: .
+    container_name: dsquiz_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: dsquiz
+    networks:
+      - dsquiznet
+
+volumes:
+  pgdata:
+
+networks:
+  dsquiznet:

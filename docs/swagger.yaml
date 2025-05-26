@@ -1,0 +1,205 @@
+basePath: /api/
+definitions:
+  Dto.Answer:
+    properties:
+      isCorrect:
+        type: boolean
+      questionID:
+        type: integer
+      text:
+        type: string
+    type: object
+  Dto.Question:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/Dto.Answer'
+        type: array
+      text:
+        type: string
+    type: object
+  Dto.UserRank:
+    properties:
+      email:
+        type: string
+      score:
+        type: integer
+    type: object
+  controllers.LoginInput:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  controllers.RegisterInput:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  controllers.UserAnswerInput:
+    properties:
+      answer_id:
+        example: 3
+        type: integer
+      question_id:
+        example: 1
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST API for your quiz project
+  title: Data Science Quiz API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: login user
+      parameters:
+      - description: Login Info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login
+      tags:
+      - login
+  /quiz/leaderboard:
+    get:
+      description: Returns leaderboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/Dto.UserRank'
+              type: array
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get leaderboard
+      tags:
+      - leaderboard
+  /quiz/questions:
+    get:
+      description: Returns all quiz questions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Dto.Question'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get questions
+      tags:
+      - questions
+  /quiz/submit:
+    post:
+      consumes:
+      - application/json
+      description: Answer the question
+      parameters:
+      - description: Answers list
+        in: body
+        name: input
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/controllers.UserAnswerInput'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties:
+                type: integer
+              type: object
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Answer
+      tags:
+      - answers
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: register user
+      parameters:
+      - description: Account Info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register
+      tags:
+      - register
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,23 @@
+package routes
+
+import (
+	"DataScience-quiz/controllers"
+	"DataScience-quiz/middleware"
+	"github.com/gin-gonic/gin"
+)
+
+func RegisterRoutes(r *gin.Engine) {
+	api := r.Group("/api")
+	{
+		api.POST("/register", controllers.Register)
+		api.POST("/login", controllers.Login)
+
+		quiz := api.Group("/quiz")
+		quiz.Use(middleware.AuthMiddleware())
+		{
+			quiz.GET("/questions", controllers.GetQuestions)
+			quiz.POST("/submit", controllers.SubmitAnswers)
+			quiz.GET("/leaderboard", controllers.GetLeaderboard)
+		}
+	}
+}
