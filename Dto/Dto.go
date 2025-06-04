@@ -4,11 +4,19 @@ type User struct {
 	Email    string
 	Password string
 	Score    int
+	Role     string `json:"role"`
 }
 
 type Question struct {
-	Text    string
-	Answers []Answer
+	Text       string
+	Answers    []Answer
+	Difficulty int `json:"difficulty"`
+}
+
+type CreateQuestionRequest struct {
+	Text       string   `json:"text" binding:"required"`
+	Difficulty int      `json:"difficulty" binding:"required"`
+	Answers    []Answer `json:"answers" binding:"required"`
 }
 
 type Answer struct {

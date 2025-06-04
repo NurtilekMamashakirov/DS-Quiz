@@ -4,40 +4,45 @@ import (
 	"DataScience-quiz/config"
 	"DataScience-quiz/models"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func Load() {
-	questions := []models.Question{
-		{
-			Text: "Что такое overfitting в машинном обучении?",
-			Answers: []models.Answer{
-				{Text: "Модель хорошо работает на обучающих данных, но плохо на новых", IsCorrect: true},
-				{Text: "Модель идеально обобщает данные", IsCorrect: false},
-				{Text: "Это способ сбора данных", IsCorrect: false},
-			},
-		},
-		{
-			Text: "Какой алгоритм лучше всего подходит для классификации?",
-			Answers: []models.Answer{
-				{Text: "K-средних", IsCorrect: false},
-				{Text: "Логистическая регрессия", IsCorrect: true},
-				{Text: "PCA", IsCorrect: false},
-			},
-		},
-		{
-			Text: "Что делает метод PCA?",
-			Answers: []models.Answer{
-				{Text: "Снижает размерность данных", IsCorrect: true},
-				{Text: "Увеличивает размерность", IsCorrect: false},
-				{Text: "Повышает точность модели", IsCorrect: false},
-			},
-		},
+	createUsers()
+}
+
+func createUsers() {
+	var adminCount int64
+	config.DB.Model(&models.User{}).Where("role = ?", models.RoleAdmin).Count(&adminCount)
+
+	if adminCount == 0 {
+		hashedAdminPassword, _ := bcrypt.GenerateFromPassword([]byte("admin123"), 10)
+		admin := models.User{
+			Email:    "admin@example.com",
+			Password: string(hashedAdminPassword),
+			Role:     models.RoleAdmin,
+		}
+		if err := config.DB.Create(&admin).Error; err != nil {
+			fmt.Println("Ошибка при создании администратора:", err)
+		} else {
+			fmt.Println("Администратор создан: admin@example.com / admin123")
+		}
 	}
 
-	for _, q := range questions {
-		err := config.DB.Create(&q).Error
-		if err != nil {
-			fmt.Println("Ошибка при создании вопроса:", err)
+	var userCount int64
+	config.DB.Model(&models.User{}).Where("role = ?", models.RoleUser).Count(&userCount)
+
+	if userCount == 0 {
+		hashedUserPassword, _ := bcrypt.GenerateFromPassword([]byte("user123"), 10)
+		user := models.User{
+			Email:    "user@example.com",
+			Password: string(hashedUserPassword),
+			Role:     models.RoleUser,
+		}
+		if err := config.DB.Create(&user).Error; err != nil {
+			fmt.Println("Ошибка при создании пользователя:", err)
+		} else {
+			fmt.Println("Пользователь создан: user@example.com / user123")
 		}
 	}
 }

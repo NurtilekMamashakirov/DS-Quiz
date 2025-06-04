@@ -9,12 +9,30 @@ definitions:
       text:
         type: string
     type: object
+  Dto.CreateQuestionRequest:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/Dto.Answer'
+        type: array
+      difficulty:
+        type: integer
+      text:
+        type: string
+    required:
+    - answers
+    - difficulty
+    - text
+    type: object
   Dto.Question:
     properties:
       answers:
         items:
           $ref: '#/definitions/Dto.Answer'
         type: array
+      difficulty:
+        description: 300, 400 или 500 баллов
+        type: integer
       text:
         type: string
     type: object
@@ -44,6 +62,9 @@ definitions:
         type: string
       password:
         example: password123
+        type: string
+      role:
+        example: user
         type: string
     required:
     - email
@@ -135,6 +156,64 @@ paths:
       security:
       - BearerAuth: []
       summary: Get questions
+      tags:
+      - questions
+    post:
+      consumes:
+      - application/json
+      description: Creates a new question with answers (admin only)
+      parameters:
+      - description: Question data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/Dto.CreateQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Dto.Question'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new question
+      tags:
+      - questions
+  /quiz/random:
+    get:
+      description: Returns a random set of 9 questions (3 of each difficulty level)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Dto.Question'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get random question set
       tags:
       - questions
   /quiz/submit:

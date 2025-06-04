@@ -13,6 +13,7 @@ import (
 type RegisterInput struct {
 	Email    string `json:"email" binding:"required" example:"user@example.com"`
 	Password string `json:"password" binding:"required" example:"password123"`
+	Role     string `json:"role" example:"user"`
 }
 
 type LoginInput struct {
@@ -33,6 +34,7 @@ func Register(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email" binding:"required"`
 		Password string `json:"password" binding:"required"`
+		Role     string `json:"role"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -42,9 +44,15 @@ func Register(c *gin.Context) {
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
 
+	role := models.RoleUser
+	if input.Role == string(models.RoleAdmin) {
+		role = models.RoleAdmin
+	}
+
 	user := models.User{
 		Email:    input.Email,
 		Password: string(hashedPassword),
+		Role:     role,
 	}
 
 	if err := config.DB.Create(&user).Error; err != nil {
@@ -52,7 +60,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	token, _ := middleware.GenerateToken(user.ID)
+	token, _ := middleware.GenerateToken(user.ID, string(user.Role))
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
@@ -88,6 +96,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, _ := middleware.GenerateToken(user.ID)
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	token, _ := middleware.GenerateToken(user.ID, string(user.Role))
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		"user": gin.H{
+			"email": user.Email,
+			"role":  user.Role,
+			"score": user.Score,
+		},
+	})
 }

@@ -127,6 +127,98 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new question with answers (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Create a new question",
+                "parameters": [
+                    {
+                        "description": "Question data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Dto.CreateQuestionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Dto.Question"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/quiz/random": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a random set of 9 questions (3 of each difficulty level)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questions"
+                ],
+                "summary": "Get random question set",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Dto.Question"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/quiz/submit": {
@@ -239,6 +331,28 @@ const docTemplate = `{
                 }
             }
         },
+        "Dto.CreateQuestionRequest": {
+            "type": "object",
+            "required": [
+                "answers",
+                "difficulty",
+                "text"
+            ],
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Dto.Answer"
+                    }
+                },
+                "difficulty": {
+                    "type": "integer"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
         "Dto.Question": {
             "type": "object",
             "properties": {
@@ -247,6 +361,10 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Dto.Answer"
                     }
+                },
+                "difficulty": {
+                    "description": "300, 400 или 500 баллов",
+                    "type": "integer"
                 },
                 "text": {
                     "type": "string"
@@ -295,6 +413,10 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "password123"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "user"
                 }
             }
         },
