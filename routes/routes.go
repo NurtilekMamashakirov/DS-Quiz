@@ -7,6 +7,9 @@ import (
 )
 
 func RegisterRoutes(r *gin.Engine) {
+	// Добавляем глобальный CORS middleware
+	r.Use(middleware.CORSMiddleware())
+
 	api := r.Group("/api")
 	{
 		api.POST("/register", controllers.Register)
